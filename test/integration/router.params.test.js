@@ -111,6 +111,30 @@ describe('router :: ', function() {
 
     });
 
+    describe.only('req.param() defaults', function() {
+
+      before(function(){
+        require('fs').writeFileSync('config/routes.js', 'module.exports.routes = {"/test": function(req,res){res.json(req.param("foo", "bar"));}, "/nonet": function(req,res){res.json(req.param("foo"));}};');
+      });
+
+      it('when a value for a param is specified, that value should be used instead of the default', function(done) {
+        httpHelper.testRoute('post', {url: 'test/?foo=123'}, function(err, response) {
+          if (err) { return done(err); }
+          assert(response.body==='"123"', Err.badResponse(response));
+          done();
+        });
+      });
+
+      it('when no value for a param is specified, the default should be used', function(done) {
+        httpHelper.testRoute('post', {url: 'test'}, function(err, response) {
+          if (err) { return done(err); }
+          assert(response.body==='"bar"', Err.badResponse(response));
+          done();
+        });
+      });
+
+    });
+
     describe('req.params.allParams', function() {
 
       before(function(){
